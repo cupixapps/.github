@@ -7,6 +7,7 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 | Repo | Description |
 |------|-------------|
 | <a href="https://github.com/cupixapps/cupix" target="_blank"><b>cupix</b></a> | 프론트엔드 모노레포 (메인 앱) |
+| <a href="https://github.com/cupixapps/backoffice" target="_blank"><b>backoffice</b></a> | 백오피스 앱 |
 | <a href="https://github.com/cupixapps/picasso" target="_blank"><b>picasso</b></a> | 프론트엔드 모노레포 |
 | <a href="https://github.com/cupixapps/seoul" target="_blank"><b>seoul</b></a> | Cupix Design System (`@cupix/ngx-ui`) |
 | <a href="https://github.com/cupixapps/prototype" target="_blank"><b>prototype</b></a> | Seoul 기반 UI 프로토타이핑 |
