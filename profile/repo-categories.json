@@ -1,0 +1,65 @@
+{
+  "org": "cupixapps",
+  "title": "Cupix Apps",
+  "description": "Cupix 프론트엔드 팀의 GitHub organization입니다.",
+  "defaultDescription": "설명 없음",
+  "sections": [
+    {
+      "title": "Repositories",
+      "rules": {
+        "names": [
+          "cupix",
+          "backoffice",
+          "picasso",
+          "seoul",
+          "prototype",
+          "cortex",
+          "common",
+          "toolbox",
+          "aps-viewer",
+          "e57-viewer",
+          "powerbi-bridge-sample"
+        ]
+      }
+    },
+    {
+      "title": "Automation",
+      "rules": {
+        "names": [
+          "issue-fixer",
+          "qa-snoop"
+        ],
+        "topics": [
+          "automation"
+        ],
+        "prefixes": [
+          "automation-"
+        ]
+      }
+    },
+    {
+      "title": "Internal",
+      "rules": {
+        "names": [
+          "frontend-interview",
+          "demo-repository"
+        ],
+        "topics": [
+          "internal"
+        ]
+      }
+    },
+    {
+      "title": "Shared Config",
+      "rules": {
+        "names": [
+          "dev-config",
+          ".github"
+        ],
+        "topics": [
+          "shared-config"
+        ]
+      }
+    }
+  ]
+}
