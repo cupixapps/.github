@@ -1,0 +1,55 @@
+name: Sync organization profile README
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate profile README
+        run: |
+          node scripts/generate-profile-readme.mjs \
+            --org cupixapps \
+            --config profile/repo-categories.json \
+            --readme profile/README.md \
+            --change-log /tmp/profile-readme-changelog.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet -- profile/README.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(profile): sync organization README"
+          title: "chore(profile): sync organization README"
+          body-path: /tmp/profile-readme-changelog.md
+          branch: "chore/sync-profile-readme"
+          delete-branch: true
+          labels: |
+            documentation
+            automation
