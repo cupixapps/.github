@@ -20,17 +20,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Generate profile README
         run: |
           node scripts/generate-profile-readme.mjs \
             --org cupixapps \
-            --config profile/repo-categories.json \
             --readme profile/README.md \
             --change-log /tmp/profile-readme-changelog.md
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.PROFILE_README_GITHUB_TOKEN || github.token }}
 
       - name: Detect changes
         id: changes

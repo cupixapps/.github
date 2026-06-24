@@ -12,16 +12,36 @@ const args = Object.fromEntries(
 );
 
 const repoRoot = process.cwd();
-const configPath = path.resolve(repoRoot, args.config ?? 'profile/repo-categories.json');
 const readmePath = path.resolve(repoRoot, args.readme ?? 'profile/README.md');
 const changeLogPath = args['change-log'] ? path.resolve(repoRoot, args['change-log']) : null;
 
-const config = JSON.parse(await fs.readFile(configPath, 'utf8'));
-const org = args.org ?? config.org;
+const org = args.org ?? 'cupixapps';
 const token = process.env.GITHUB_TOKEN;
+const title = 'Cupix Apps';
+const description = 'Cupix 프론트엔드 팀의 GitHub organization입니다.';
+const defaultDescription = '설명 없음';
+const defaultSectionTitle = 'Repositories';
+const sections = [
+  {
+    title: defaultSectionTitle,
+    topics: []
+  },
+  {
+    title: 'Automation',
+    topics: ['automation']
+  },
+  {
+    title: 'Internal',
+    topics: ['internal']
+  },
+  {
+    title: 'Shared Config',
+    topics: ['shared-config']
+  }
+];
 
 if (!org) {
-  throw new Error('Missing organization. Use --org or set "org" in config file.');
+  throw new Error('Missing organization. Use --org.');
 }
 
 const fetchRepos = async () => {
@@ -29,7 +49,7 @@ const fetchRepos = async () => {
   let page = 1;
 
   while (true) {
-    const url = `https://api.github.com/orgs/${org}/repos?type=public&per_page=100&page=${page}&sort=full_name`;
+    const url = `https://api.github.com/orgs/${org}/repos?type=all&per_page=100&page=${page}&sort=full_name`;
     const response = await fetch(url, {
       headers: {
         Accept: 'application/vnd.github+json',
@@ -53,6 +73,27 @@ const fetchRepos = async () => {
   return allRepos;
 };
 
+const githubGetJson = async (url) => {
+  const response = await fetch(url, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      ...(token ? { Authorization: 'Bearer ' + token } : {})
+    }
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`GitHub API request failed (${response.status}): ${body}`);
+  }
+
+  return response.json();
+};
+
+const fetchRepoTopics = async (repoName) => {
+  const body = await githubGetJson(`https://api.github.com/repos/${org}/${repoName}/topics`);
+  return Array.isArray(body.names) ? body.names : [];
+};
+
 const parseExistingRepoNames = (content) => {
   if (!content) return new Set();
   const regex = /<b>([^<]+)<\/b>/g;
@@ -66,18 +107,56 @@ const parseExistingRepoNames = (content) => {
   return names;
 };
 
-const rulesMatch = (repo, rules = {}) => {
-  const names = rules.names ?? [];
-  const topics = rules.topics ?? [];
-  const prefixes = rules.prefixes ?? [];
+const parseExistingRepoDescriptions = (content) => {
+  const descriptions = new Map();
+  if (!content) return descriptions;
 
-  if (names.includes(repo.name)) return true;
-  if (prefixes.some((prefix) => repo.name.startsWith(prefix))) return true;
+  const regex = /^\| <a href="[^"]+" target="_blank"><b>([^<]+)<\/b><\/a> \| (.*) \|$/gm;
+  let match;
 
+  while ((match = regex.exec(content)) !== null) {
+    descriptions.set(match[1], match[2]);
+  }
+
+  return descriptions;
+};
+
+const parseExistingSectionOrders = (content) => {
+  const orders = new Map();
+  if (!content) return orders;
+
+  let sectionTitle = null;
+
+  for (const line of content.split('\n')) {
+    const sectionMatch = line.match(/^## (.+)$/);
+    if (sectionMatch) {
+      sectionTitle = sectionMatch[1];
+      if (!orders.has(sectionTitle)) {
+        orders.set(sectionTitle, []);
+      }
+      continue;
+    }
+
+    if (!sectionTitle) continue;
+
+    const repoMatch = line.match(/<b>([^<]+)<\/b>/);
+    if (repoMatch) {
+      orders.get(sectionTitle).push(repoMatch[1]);
+    }
+  }
+
+  return orders;
+};
+
+const sectionForRepo = (repo) => {
   const repoTopics = repo.topics ?? [];
-  if (topics.some((topic) => repoTopics.includes(topic))) return true;
-
-  return false;
+  return (
+    sections.find(
+      (section) =>
+        section.title !== defaultSectionTitle &&
+        section.topics.some((topic) => repoTopics.includes(topic))
+    ) ?? sections[0]
+  );
 };
 
 const htmlLink = (repo) =>
@@ -88,11 +167,17 @@ const sanitizeDescription = (description, fallback) => {
   return base.replace(/\|/g, '\\|');
 };
 
-const buildSectionRows = (repos, section, fallbackDescription) => {
+const buildSectionRows = (
+  repos,
+  section,
+  fallbackDescription,
+  existingDescriptions,
+  existingSectionOrders
+) => {
   const ordered = [];
   const used = new Set();
 
-  const preferredNames = section.rules?.names ?? [];
+  const preferredNames = existingSectionOrders.get(section.title) ?? [];
   for (const name of preferredNames) {
     const repo = repos.find((item) => item.name === name);
     if (repo) {
@@ -108,75 +193,28 @@ const buildSectionRows = (repos, section, fallbackDescription) => {
   ordered.push(...remaining);
 
   return ordered.map(
-    (repo) => `| ${htmlLink(repo)} | ${sanitizeDescription(repo.description, fallbackDescription)} |`
+    (repo) =>
+      `| ${htmlLink(repo)} | ${sanitizeDescription(
+        existingDescriptions.get(repo.name) ?? repo.description,
+        fallbackDescription
+      )} |`
   );
 };
 
 const repos = (await fetchRepos())
-  .filter((repo) => !repo.private && !repo.archived)
+  .filter((repo) => !repo.archived)
   .map((repo) => ({
     name: repo.name,
     html_url: repo.html_url,
-    description: repo.description,
-    topics: Array.isArray(repo.topics) ? repo.topics : []
+    description: repo.description
   }));
 
-const sectionMap = new Map(config.sections.map((section) => [section.title, []]));
-const uncategorized = [];
-
-for (const repo of repos) {
-  const matchedSection = config.sections.find((section) => rulesMatch(repo, section.rules));
-  if (matchedSection) {
-    sectionMap.get(matchedSection.title).push(repo);
-  } else {
-    uncategorized.push(repo);
-  }
-}
-
-if (uncategorized.length > 0 && config.includeUncategorized !== false) {
-  const fallbackTitle = config.uncategorizedTitle ?? 'Others';
-  if (!sectionMap.has(fallbackTitle)) {
-    sectionMap.set(fallbackTitle, []);
-  }
-  sectionMap.get(fallbackTitle).push(...uncategorized);
-}
-
-const lines = [];
-lines.push('<!-- This file is auto-generated by scripts/generate-profile-readme.mjs -->');
-lines.push(`# ${config.title}`);
-lines.push('');
-lines.push(config.description);
-
-for (const section of config.sections) {
-  const reposInSection = sectionMap.get(section.title) ?? [];
-  if (reposInSection.length === 0) continue;
-
-  lines.push('');
-  lines.push(`## ${section.title}`);
-  lines.push('');
-  lines.push('| Repo | Description |');
-  lines.push('|------|-------------|');
-  lines.push(...buildSectionRows(reposInSection, section, config.defaultDescription ?? '설명 없음'));
-}
-
-const fallbackTitle = config.uncategorizedTitle ?? 'Others';
-if (sectionMap.has(fallbackTitle) && (sectionMap.get(fallbackTitle) ?? []).length > 0) {
-  lines.push('');
-  lines.push(`## ${fallbackTitle}`);
-  lines.push('');
-  lines.push('| Repo | Description |');
-  lines.push('|------|-------------|');
-  lines.push(
-    ...buildSectionRows(
-      sectionMap.get(fallbackTitle),
-      { rules: {} },
-      config.defaultDescription ?? '설명 없음'
-    )
-  );
-}
-
-lines.push('');
-const nextReadme = `${lines.join('\n')}\n`;
+const reposWithTopics = await Promise.all(
+  repos.map(async (repo) => ({
+    ...repo,
+    topics: await fetchRepoTopics(repo.name)
+  }))
+);
 
 let previousReadme = '';
 try {
@@ -185,18 +223,72 @@ try {
   previousReadme = '';
 }
 
+const existingDescriptions = parseExistingRepoDescriptions(previousReadme);
+const existingSectionOrders = parseExistingSectionOrders(previousReadme);
+const previousNames = parseExistingRepoNames(previousReadme);
+const visibleNames = new Set(reposWithTopics.map((repo) => repo.name));
+const missingPreviousNames = [...previousNames]
+  .filter((name) => !visibleNames.has(name))
+  .sort();
+
+if (missingPreviousNames.length > 0) {
+  throw new Error(
+    [
+      'GitHub API did not return repositories that are already listed in the README.',
+      'The token may not have access to private organization repositories, or the repositories were removed.',
+      'Missing repositories:',
+      ...missingPreviousNames.map((name) => `- ${name}`)
+    ].join('\n')
+  );
+}
+
+const sectionMap = new Map(sections.map((section) => [section.title, []]));
+
+for (const repo of reposWithTopics) {
+  const section = sectionForRepo(repo);
+  sectionMap.get(section.title).push(repo);
+}
+
+const lines = [];
+lines.push('<!-- This file is auto-generated by scripts/generate-profile-readme.mjs -->');
+lines.push(`# ${title}`);
+lines.push('');
+lines.push(description);
+
+for (const section of sections) {
+  const reposInSection = sectionMap.get(section.title) ?? [];
+  if (reposInSection.length === 0) continue;
+
+  lines.push('');
+  lines.push(`## ${section.title}`);
+  lines.push('');
+  lines.push('| Repo | Description |');
+  lines.push('|------|-------------|');
+  lines.push(
+    ...buildSectionRows(
+      reposInSection,
+      section,
+      defaultDescription,
+      existingDescriptions,
+      existingSectionOrders
+    )
+  );
+}
+
+lines.push('');
+const nextReadme = `${lines.join('\n')}\n`;
+
 await fs.writeFile(readmePath, nextReadme, 'utf8');
 
 if (changeLogPath) {
-  const previousNames = parseExistingRepoNames(previousReadme);
-  const nextNames = new Set(repos.map((repo) => repo.name));
+  const nextNames = new Set(reposWithTopics.map((repo) => repo.name));
 
   const added = [...nextNames].filter((name) => !previousNames.has(name)).sort();
   const removed = [...previousNames].filter((name) => !nextNames.has(name)).sort();
 
   const report = [
     '## Summary',
-    'Automated sync of `profile/README.md` using public, non-archived repositories in `cupixapps`.',
+    'Automated sync of `profile/README.md` using visible, non-archived repositories in `cupixapps`.',
     '',
     '## Repository changes',
     '',
@@ -207,9 +299,12 @@ if (changeLogPath) {
     ...(removed.length > 0 ? removed.map((name) => `- \`${name}\``) : ['- None']),
     '',
     '### Notes',
-    '- Private repositories are excluded.',
+    '- Private repositories are included when the token can access them.',
     '- Archived repositories are excluded.',
-    '- Empty descriptions are replaced with the configured fallback text.'
+    '- Repositories with `automation`, `internal`, or `shared-config` topics are grouped into matching sections.',
+    '- Repositories without a recognized section topic are grouped under `Repositories`.',
+    '- Existing README descriptions and section ordering are preserved.',
+    '- Empty descriptions are replaced with the default fallback text.'
   ];
 
   await fs.writeFile(changeLogPath, `${report.join('\n')}\n`, 'utf8');
