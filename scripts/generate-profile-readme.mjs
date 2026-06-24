@@ -29,7 +29,7 @@ const fetchRepos = async () => {
   let page = 1;
 
   while (true) {
-    const url = `https://api.github.com/orgs/${org}/repos?type=public&per_page=100&page=${page}&sort=full_name`;
+    const url = `https://api.github.com/orgs/${org}/repos?type=all&per_page=100&page=${page}&sort=full_name`;
     const response = await fetch(url, {
       headers: {
         Accept: 'application/vnd.github+json',
@@ -113,13 +113,32 @@ const buildSectionRows = (repos, section, fallbackDescription) => {
 };
 
 const repos = (await fetchRepos())
-  .filter((repo) => !repo.private && !repo.archived)
+  .filter((repo) => !repo.archived)
   .map((repo) => ({
     name: repo.name,
     html_url: repo.html_url,
     description: repo.description,
     topics: Array.isArray(repo.topics) ? repo.topics : []
   }));
+
+const requiredNames = new Set(
+  config.sections.flatMap((section) => section.rules?.names ?? [])
+);
+const visibleNames = new Set(repos.map((repo) => repo.name));
+const missingRequiredNames = [...requiredNames]
+  .filter((name) => !visibleNames.has(name))
+  .sort();
+
+if (missingRequiredNames.length > 0) {
+  throw new Error(
+    [
+      'GitHub API did not return configured repositories.',
+      'The token may not have access to private organization repositories.',
+      'Missing repositories:',
+      ...missingRequiredNames.map((name) => `- ${name}`)
+    ].join('\n')
+  );
+}
 
 const sectionMap = new Map(config.sections.map((section) => [section.title, []]));
 const uncategorized = [];
@@ -196,7 +215,7 @@ if (changeLogPath) {
 
   const report = [
     '## Summary',
-    'Automated sync of `profile/README.md` using public, non-archived repositories in `cupixapps`.',
+    'Automated sync of `profile/README.md` using visible, non-archived repositories in `cupixapps`.',
     '',
     '## Repository changes',
     '',
@@ -207,7 +226,7 @@ if (changeLogPath) {
     ...(removed.length > 0 ? removed.map((name) => `- \`${name}\``) : ['- None']),
     '',
     '### Notes',
-    '- Private repositories are excluded.',
+    '- Private repositories are included when the token can access them.',
     '- Archived repositories are excluded.',
     '- Empty descriptions are replaced with the configured fallback text.'
   ];
