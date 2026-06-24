@@ -32,6 +32,7 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 |------|-------------|
 | <a href="https://github.com/cupixapps/frontend-interview" target="_blank"><b>frontend-interview</b></a> | 프론트엔드 인터뷰 자료 |
 | <a href="https://github.com/cupixapps/demo-repository" target="_blank"><b>demo-repository</b></a> | GitHub 기능 데모용 저장소 |
+| <a href="https://github.com/cupixapps/spec-handoff" target="_blank"><b>spec-handoff</b></a> | 설명 없음 |
 
 ## Shared Config
 
@@ -39,3 +40,4 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 |------|-------------|
 | <a href="https://github.com/cupixapps/dev-config" target="_blank"><b>dev-config</b></a> | 팀 간 공유 개발환경 설정 (Claude, Cursor 등) |
 | <a href="https://github.com/cupixapps/.github" target="_blank"><b>.github</b></a> | Organization profile 및 community health files |
+
