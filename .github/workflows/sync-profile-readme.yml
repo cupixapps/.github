@@ -41,6 +41,7 @@ jobs:
           fi
 
       - name: Create pull request
+        id: cpr
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
@@ -52,3 +53,9 @@ jobs:
           labels: |
             documentation
             automation
+
+      - name: Merge pull request
+        if: steps.cpr.outputs.pull-request-operation == 'created' || steps.cpr.outputs.pull-request-operation == 'updated'
+        run: gh pr merge "${{ steps.cpr.outputs.pull-request-number }}" --squash --delete-branch
+        env:
+          GH_TOKEN: ${{ github.token }}
