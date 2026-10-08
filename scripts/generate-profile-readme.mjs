@@ -89,6 +89,25 @@ const githubGetJson = async (url) => {
   return response.json();
 };
 
+const fetchRenamedRepoName = async (repoName) => {
+  // Renamed repositories redirect from their old name to the current repository.
+  const response = await fetch(`https://api.github.com/repos/${org}/${repoName}`, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      ...(token ? { Authorization: 'Bearer ' + token } : {})
+    }
+  });
+
+  if (!response.ok) return null;
+
+  const repo = await response.json();
+  if (repo.owner?.login !== org || repo.name === repoName) return null;
+  return repo.name;
+};
+
+const renameKeys = (map, renames) =>
+  new Map([...map].map(([key, value]) => [renames.get(key) ?? key, value]));
+
 const fetchRepoTopics = async (repoName) => {
   const body = await githubGetJson(`https://api.github.com/repos/${org}/${repoName}/topics`);
   return Array.isArray(body.names) ? body.names : [];
@@ -223,10 +242,27 @@ try {
   previousReadme = '';
 }
 
-const existingDescriptions = parseExistingRepoDescriptions(previousReadme);
-const existingSectionOrders = parseExistingSectionOrders(previousReadme);
-const previousNames = parseExistingRepoNames(previousReadme);
 const visibleNames = new Set(reposWithTopics.map((repo) => repo.name));
+const renames = new Map();
+
+for (const name of parseExistingRepoNames(previousReadme)) {
+  if (visibleNames.has(name)) continue;
+  const renamedName = await fetchRenamedRepoName(name);
+  if (renamedName && visibleNames.has(renamedName)) {
+    renames.set(name, renamedName);
+  }
+}
+
+const existingDescriptions = renameKeys(parseExistingRepoDescriptions(previousReadme), renames);
+const existingSectionOrders = new Map(
+  [...parseExistingSectionOrders(previousReadme)].map(([section, names]) => [
+    section,
+    names.map((name) => renames.get(name) ?? name)
+  ])
+);
+const previousNames = new Set(
+  [...parseExistingRepoNames(previousReadme)].map((name) => renames.get(name) ?? name)
+);
 const missingPreviousNames = [...previousNames]
   .filter((name) => !visibleNames.has(name))
   .sort();
@@ -298,12 +334,20 @@ if (changeLogPath) {
     '### Removed',
     ...(removed.length > 0 ? removed.map((name) => `- \`${name}\``) : ['- None']),
     '',
+    '### Renamed',
+    ...(renames.size > 0
+      ? [...renames]
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([from, to]) => `- \`${from}\` → \`${to}\``)
+      : ['- None']),
+    '',
     '### Notes',
     '- Private repositories are included when the token can access them.',
     '- Archived repositories are excluded.',
     '- Repositories with `automation`, `internal`, or `shared-config` topics are grouped into matching sections.',
     '- Repositories without a recognized section topic are grouped under `Repositories`.',
     '- Existing README descriptions and section ordering are preserved.',
+    '- Renamed repositories keep their existing description and position under the new name.',
     '- Empty descriptions are replaced with the default fallback text.'
   ];
 
