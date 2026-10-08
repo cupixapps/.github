@@ -32,7 +32,7 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 |------|-------------|
 | <a href="https://github.com/cupixapps/frontend-interview" target="_blank"><b>frontend-interview</b></a> | 프론트엔드 인터뷰 자료 |
 | <a href="https://github.com/cupixapps/demo-repository" target="_blank"><b>demo-repository</b></a> | GitHub 기능 데모용 저장소 |
-| <a href="https://github.com/cupixapps/spec-handoff" target="_blank"><b>spec-handoff</b></a> | 설명 없음 |
+| <a href="https://github.com/cupixapps/product-knowledge" target="_blank"><b>product-knowledge</b></a> | 설명 없음 |
 
 ## Shared Config
 
