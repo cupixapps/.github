@@ -18,6 +18,15 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 | <a href="https://github.com/cupixapps/aps-viewer" target="_blank"><b>aps-viewer</b></a> | APS (Autodesk) 뷰어 |
 | <a href="https://github.com/cupixapps/e57-viewer" target="_blank"><b>e57-viewer</b></a> | E57 포인트클라우드 뷰어 |
 | <a href="https://github.com/cupixapps/powerbi-bridge-sample" target="_blank"><b>powerbi-bridge-sample</b></a> | Power BI bridge 샘플 앱 |
+| <a href="https://github.com/cupixapps/ade-v16-probe" target="_blank"><b>ade-v16-probe</b></a> | ADE V16 repo-access probe (staging) |
+| <a href="https://github.com/cupixapps/connect-lib" target="_blank"><b>connect-lib</b></a> | Native Sagan libraries used by Cupix Connect |
+| <a href="https://github.com/cupixapps/cupix-local-redirect" target="_blank"><b>cupix-local-redirect</b></a> | 설명 없음 |
+| <a href="https://github.com/cupixapps/cupix-placetrand" target="_blank"><b>cupix-placetrand</b></a> | 설명 없음 |
+| <a href="https://github.com/cupixapps/cupix-viewer" target="_blank"><b>cupix-viewer</b></a> | maxwell-viewer project |
+| <a href="https://github.com/cupixapps/cupixrnd-agent-marketplace" target="_blank"><b>cupixrnd-agent-marketplace</b></a> | A marketplace repository for sharing AI Skills, Agents, and Factories across R&D teams |
+| <a href="https://github.com/cupixapps/DeltaBIM-streaming" target="_blank"><b>DeltaBIM-streaming</b></a> | 설명 없음 |
+| <a href="https://github.com/cupixapps/DeltaBIM-Team" target="_blank"><b>DeltaBIM-Team</b></a> | DeltaBIM-Team |
+| <a href="https://github.com/cupixapps/skills" target="_blank"><b>skills</b></a> | 설명 없음 |
 
 ## Automation
 
@@ -25,6 +34,7 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 |------|-------------|
 | <a href="https://github.com/cupixapps/issue-fixer" target="_blank"><b>issue-fixer</b></a> | AI 기반 Jira 버그 자동 수정 |
 | <a href="https://github.com/cupixapps/qa-snoop" target="_blank"><b>qa-snoop</b></a> | AI 기반 QA 회귀 테스트 자동화 |
+| <a href="https://github.com/cupixapps/apollo" target="_blank"><b>apollo</b></a> | 설명 없음 |
 
 ## Internal
 
