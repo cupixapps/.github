@@ -27,6 +27,7 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 | <a href="https://github.com/cupixapps/DeltaBIM-streaming" target="_blank"><b>DeltaBIM-streaming</b></a> | 설명 없음 |
 | <a href="https://github.com/cupixapps/DeltaBIM-Team" target="_blank"><b>DeltaBIM-Team</b></a> | DeltaBIM-Team |
 | <a href="https://github.com/cupixapps/skills" target="_blank"><b>skills</b></a> | 설명 없음 |
+| <a href="https://github.com/cupixapps/dash-apps" target="_blank"><b>dash-apps</b></a> | Prism Dash app sources (one folder per slug) |
 
 ## Automation
 
