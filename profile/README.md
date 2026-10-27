@@ -29,6 +29,10 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 | <a href="https://github.com/cupixapps/skills" target="_blank"><b>skills</b></a> | 설명 없음 |
 | <a href="https://github.com/cupixapps/dash-apps" target="_blank"><b>dash-apps</b></a> | Prism Dash app sources (one folder per slug) |
 | <a href="https://github.com/cupixapps/cupix-deployments" target="_blank"><b>cupix-deployments</b></a> | Internal Dali QA, Stage and Production deployment history and heatmaps. |
+| <a href="https://github.com/cupixapps/heisenberg" target="_blank"><b>heisenberg</b></a> | Cupix Heisenberg editor — migrated from Azure DevOps with full Git history |
+| <a href="https://github.com/cupixapps/heisenberg-engine" target="_blank"><b>heisenberg-engine</b></a> | Cupix Heisenberg shared engine — migrated from Azure DevOps with full Git history |
+| <a href="https://github.com/cupixapps/heisenberg-player" target="_blank"><b>heisenberg-player</b></a> | Cupix Heisenberg Player — migrated from Azure DevOps with full Git history |
+| <a href="https://github.com/cupixapps/llm-tracing" target="_blank"><b>llm-tracing</b></a> | 설명 없음 |
 
 ## Automation
 
