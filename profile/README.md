@@ -35,6 +35,7 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 | <a href="https://github.com/cupixapps/llm-tracing" target="_blank"><b>llm-tracing</b></a> | 설명 없음 |
 | <a href="https://github.com/cupixapps/oneshot" target="_blank"><b>oneshot</b></a> | 설명 없음 |
 | <a href="https://github.com/cupixapps/ax-aws" target="_blank"><b>ax-aws</b></a> | The common infra of aws |
+| <a href="https://github.com/cupixapps/segspec" target="_blank"><b>segspec</b></a> | Segment 이벤트 명세부터 구현, 화면 검증, PR까지 자동화 |
 
 ## Automation
 
