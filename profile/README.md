@@ -36,6 +36,8 @@ Cupix 프론트엔드 팀의 GitHub organization입니다.
 | <a href="https://github.com/cupixapps/oneshot" target="_blank"><b>oneshot</b></a> | 설명 없음 |
 | <a href="https://github.com/cupixapps/ax-aws" target="_blank"><b>ax-aws</b></a> | The common infra of aws |
 | <a href="https://github.com/cupixapps/segspec" target="_blank"><b>segspec</b></a> | Segment 이벤트 명세부터 구현, 화면 검증, PR까지 자동화 |
+| <a href="https://github.com/cupixapps/ci-scaleset-poc" target="_blank"><b>ci-scaleset-poc</b></a> | scale set PoC (temporary) |
+| <a href="https://github.com/cupixapps/spec-flow" target="_blank"><b>spec-flow</b></a> | Prism 프로젝트별 스펙 변경과 SQ·DE·Jira 이슈 흐름을 한눈에 보는 뷰어 |
 
 ## Automation
 
